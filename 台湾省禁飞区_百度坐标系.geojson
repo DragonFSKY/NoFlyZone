@@ -1,0 +1,41 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Magong Airport",
+        "type": 10,
+        "height": 0,
+        "level": 2
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              119.58808,
+              23.53124
+            ],
+            [
+              119.62001,
+              23.62067
+            ],
+            [
+              119.66841,
+              23.60599
+            ],
+            [
+              119.63645,
+              23.51657
+            ],
+            [
+              119.58808,
+              23.53124
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}
