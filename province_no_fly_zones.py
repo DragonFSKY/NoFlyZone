@@ -1,7 +1,8 @@
 import json
 import urllib.request
 import geopandas as gpd
-from shapely.geometry import Point, Polygon
+from shapely.geometry import Point, Polygon, MultiPolygon
+from shapely.ops import unary_union
 import numpy as np
 
 # 读取各省边界_百度坐标系.geojson文件
@@ -38,7 +39,7 @@ def find_province_by_point(point, geo_data):
             return province_name
     return None
 
-url_template = "https://www.dji.com/cn/api/geo/areas?lng=%s&lat=%s&country=CN&search_radius=215000&drone=spark&level=%s&zones_mode=total"
+url_template = "https://www.dji.com/cn/api/geo/areas?lng=%s&lat=%s&country=CN&search_radius=250000&drone=spark&level=%s&zones_mode=total"
 
 # 创建一个集合用于存储不重复的area
 unique_areas = set()
@@ -49,7 +50,8 @@ province_area_mapping = {}
 # 初始化省份映射字典
 for index, row in geo_data.iterrows():
     province_name = row['name']
-    province_area_mapping[province_name] = []
+    if province_name:
+        province_area_mapping[province_name] = []
 
 for lng, lat in generate_china_points():
     url = url_template % (lng, lat, "1%2C2%2C4%2C7%2C8")
@@ -97,17 +99,19 @@ def parse_data_to_geojson(data):
                         "level": sub_area['level']
                     },
                     "geometry": polygon.__geo_interface__
-                })  
-                geojson_data = {
-                    "type": "FeatureCollection",
-                    "features": features
-                }
-                return geojson_data
+                })
+
+    geojson_data = {
+        "type": "FeatureCollection",
+        "features": features
+    }
+
+    return geojson_data
+
 # 遍历每个省份的禁飞区列表
 for province_name, areas in province_area_mapping.items():
-    # 将数据转换为 GeoJSON 格式
+    # 将数据转换为 Polygon 对象列表
     geojson_data = parse_data_to_geojson(areas)
-
     # 保存 GeoJSON 数据到文件
     with open(f'{province_name}禁飞区_百度坐标系.geojson', 'w', encoding='utf-8') as f:
         json.dump(geojson_data, f, ensure_ascii=False, indent=2)
